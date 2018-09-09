@@ -2,7 +2,11 @@ package com.craigslist.CraigslistApplication;
 
 import java.io.IOException;
 
+import org.testng.annotations.Test;
+
 import io.restassured.RestAssured;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.config.SessionConfig;
 import io.restassured.filter.session.SessionFilter;
 import io.restassured.http.Cookie;
 import io.restassured.http.Cookies;
@@ -14,17 +18,17 @@ public class APITest {
 	String sessionId;
 	CookieFilter cookieFilter = new CookieFilter();
 	SessionFilter sessionFilter = new SessionFilter();
-	
-	
-	public void deleteSearch(String subId, String subName) throws IOException {
 		
+	public void deleteSearch(String subId, String subName) throws IOException {
+
 		Cookies allCookies = login();
 		deleteSearch(allCookies, subId, subName);
 	}
 
+	@Test
 	private Cookies login() {
 		RestAssured.baseURI = "https://accounts.craigslist.org";
-		RequestSpecification httpRequest = RestAssured.given();
+		RequestSpecification httpRequest = RestAssured.given().config(new RestAssuredConfig().sessionConfig(new SessionConfig().sessionIdName("cl_session")));
 		
 		httpRequest.contentType("application/x-www-form-urlencoded")
 		.and().header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36")
@@ -54,7 +58,7 @@ public class APITest {
 	
 	private void deleteSearch(Cookies allCookies, String subId, String subName) {
 		RestAssured.baseURI = "https://accounts.craigslist.org";
-		RequestSpecification httpRequest = RestAssured.given();
+		RequestSpecification httpRequest = RestAssured.given().config(new RestAssuredConfig().sessionConfig(new SessionConfig().sessionIdName("cl_session")));
 		
 		httpRequest.contentType("application/x-www-form-urlencoded")
 		.and().header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36")
@@ -62,7 +66,7 @@ public class APITest {
 		.and().header("Origin", "https://accounts.craigslist.org")
 		.and().header("Referer", "https://accounts.craigslist.org/login/home?show_tab=searches")
 		.and().cookies(allCookies)
-//		.and().sessionId(sessionFilter)
+		.and().filter(sessionFilter)
 		.given().body("subID:" + subId + "\r\n" + 
 				"subName:" + subName)
 		.filter(sessionFilter)
